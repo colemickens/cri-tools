@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 set -x
+set -euo pipefail
 
-RUNTIME="io.containerd.runtime.kata.v2" # fails with: ctr: no such file or directory: not found
-#RUNTIME="io.containerd.runtime.v1.linux" # works
+RUNTIME="${RUNTIME:-"io.containerd.kata.v2"}"
+#RUNTIME="io.containerd.runc.v1"
 
 image="docker.io/library/redis:alpine"
 
-sudo ctr container delete redis0
-sudo ctr images pull "${image}"
-sudo ctr run \
+sudo ctr --debug container delete redisctr0
+sudo ctr --debug images pull "${image}"
+sudo ctr --debug run \
   --runtime "${RUNTIME}" \
-  "${image}" redis0 /bin/ash
+  "${image}" redisctr0 /bin/ash
 
