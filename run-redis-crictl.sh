@@ -4,23 +4,29 @@ set -x
 set -euo pipefail
 
 # FOLLOW: https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md
-# requires patch: https://github.com/kubernetes-sigs/cri-tools/pull/383
+# requires the kata-runtime/shimv2 pr to be merged
 
-RUNTIME="kata"
-##RUNTIME="io.containerd.runtime.kata.v2"
+RUNTIME=""     # blank is containerd default
+RUNTIME="runc" # i have a runc runtime explicitly configured as well
+RUNTIME="kata" # kata-containers is "kata"
 
-sudo crictl stopp $(crictl pods -q)
-sudo crictl rmp $(crictl pods -q)
-
+NAME="redis-crictl-${RUNTIME}"
 image="docker.io/library/redis:alpine"
+
+function cleanup() {
+  sudo crictl stopp $(crictl pods -q)
+  sudo crictl rmp $(crictl pods -q)
+}
+trap cleanup EXIT
+cleanup
 
 cat<<EOF >"/tmp/pod-config.json"
 {
   "metadata": {
-    "name": "rediscrictl0",
+    "name": "${NAME}g",
     "namespace": "default",
     "attempt": 1,
-    "uid": "rediscrictl0"
+    "uid": "${NAME}g"
   },
   "logDirectory": "/tmp",
   "linux": {}
@@ -29,13 +35,13 @@ EOF
 cat<<EOF >"/tmp/container-config.json"
 {
   "metadata": {
-    "name": "rediscrictl0",
+    "name": "${NAME}g",
     "attempt": 2
   },
   "image":{
     "image": "docker.io/library/redis:alpine"
   },
-  "log_path": "redis.log",
+  "log_path": "${NAME}.log",
   "linux": {}
 }
 EOF
@@ -49,9 +55,10 @@ sudo crictl pull "${image}"
 podid="$(crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
 
 # TODO: why is pod-config repeated, and passed by id???
+# TODO: is it just PUT semantics?
 containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
 
 sudo crictl start "${containerid}"
-sleep 1
-sudo crictl exec -i -t "${containerid}" top
+#sleep 1
+#sudo crictl exec -i -t "${containerid}" top
 
