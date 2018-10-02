@@ -3,14 +3,12 @@
 set -x
 set -euo pipefail
 
-# FOLLOW: https://github.com/kubernetes-sigs/cri-tools/blob/master/docs/crictl.md
-# requires the kata-runtime/shimv2 pr to be merged
+[[ "${1:-}" == "kata" ]] && RUNTIME2="kata"
+[[ "${1:-}" == "runc" ]] && RUNTIME2="runc"
 
-RUNTIME=""     # blank is containerd default
-RUNTIME="runc" # i have a runc runtime explicitly configured as well
-RUNTIME="kata" # kata-containers is "kata"
+[[ "${RUNTIME2:-}" == "" ]] && echo "first arg is runtime (kata|runc)" && exit -1
 
-NAME="redis-crictl-${RUNTIME}"
+NAME="redis-crictl-${RUNTIME2}"
 image="docker.io/library/redis:alpine"
 
 function cleanup() {
@@ -52,13 +50,22 @@ EOF
 
 sudo crictl pull "${image}"
 
-podid="$(crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
+podid="$(crictl --debug runp --runtime="${RUNTIME2}" "/tmp/pod-config.json")"
 
 # TODO: why is pod-config repeated, and passed by id???
 # TODO: is it just PUT semantics?
 containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
 
+# option 1 - run ash inside the container rootfs
+# todo
+
+# option 2 - run the default container command
 sudo crictl start "${containerid}"
+
+# option 3 - run a command inside where redis is running
 #sleep 1
 #sudo crictl exec -i -t "${containerid}" top
+
+
+# TODO: note that we should doc that ctr goes in fg, crictl puts it in bg when running default cmd
 
