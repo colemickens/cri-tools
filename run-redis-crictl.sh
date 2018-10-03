@@ -12,8 +12,8 @@ NAME="redis-crictl-${RUNTIME2}"
 image="docker.io/library/redis:alpine"
 
 function cleanup() {
-  sudo crictl stopp $(crictl pods -q)
-  sudo crictl rmp $(crictl pods -q)
+  sudo crictl stopp $(crictl pods -q) || true
+  sudo crictl rmp $(crictl pods -q) || true
 }
 trap cleanup EXIT
 cleanup
@@ -61,6 +61,7 @@ containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/po
 
 # option 2 - run the default container command
 sudo crictl start "${containerid}"
+sleep 10000
 
 # option 3 - run a command inside where redis is running
 #sleep 1
