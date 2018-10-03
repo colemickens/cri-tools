@@ -24,8 +24,8 @@ sudo ctr --debug container delete ${NAME} || true
 sudo ctr --debug images pull "${image}"
 
 # option 1 - run ash inside the container rootfs
-sudo ctr --debug run --tty --runtime "${RUNTIME2}" "${image}" ${NAME} /bin/ash
+#sudo ctr --debug run --tty --runtime "${RUNTIME2}" "${image}" ${NAME} /bin/ash
 
 # option 2 - run the default container command
-# sudo ctr --debug run --tty --runtime "${RUNTIME2}" "${image}" ${NAME}
+sudo ctr --debug run --tty --runtime "${RUNTIME2}" "${image}" ${NAME}
 
