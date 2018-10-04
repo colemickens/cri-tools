@@ -3,13 +3,10 @@
 set -x
 set -euo pipefail
 
-[[ "${1:-}" == "kata" ]] && RUNTIME2="kata"
-[[ "${1:-}" == "runc" ]] && RUNTIME2="runc"
-
-[[ "${RUNTIME2:-}" == "" ]] && echo "first arg is runtime (kata|runc)" && exit -1
-
-NAME="redis-crictl-${RUNTIME2}"
+NAME="redis-crictl-${1:-"default"}"
 image="docker.io/library/redis:alpine"
+
+RUNTIME="${1:-}"
 
 function cleanup() {
   sudo crictl stopp $(crictl pods -q) || true
@@ -21,7 +18,7 @@ cleanup
 cat<<EOF >"/tmp/pod-config.json"
 {
   "metadata": {
-    "name": "${NAME}g",
+    "name": "${NAME}",
     "namespace": "default",
     "attempt": 1,
     "uid": "${NAME}g"
@@ -50,7 +47,7 @@ EOF
 
 sudo crictl pull "${image}"
 
-podid="$(crictl --debug runp --runtime="${RUNTIME2}" "/tmp/pod-config.json")"
+podid="$(crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
 
 # TODO: why is pod-config repeated, and passed by id???
 # TODO: is it just PUT semantics?
