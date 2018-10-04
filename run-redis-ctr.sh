@@ -5,6 +5,7 @@ set -euo pipefail
 
 [[ "${1:-}" == "kata" ]] && RUNTIME2="io.containerd.kata.v2"
 [[ "${1:-}" == "runc" ]] && RUNTIME2="io.containerd.runc.v1"
+[[ "${1:-}" == "default" ]] && RUNTIME2="io.containerd.runtime.v1.linux"
 
 [[ "${RUNTIME2:-}" == "" ]] && echo "first arg is runtime (kata|runc)" && exit -1
 
