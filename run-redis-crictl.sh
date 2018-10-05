@@ -21,7 +21,7 @@ cat<<EOF >"/tmp/pod-config.json"
     "name": "${NAME}",
     "namespace": "default",
     "attempt": 1,
-    "uid": "${NAME}g"
+    "uid": "${NAME}"
   },
   "logDirectory": "/tmp",
   "linux": {}
@@ -30,7 +30,7 @@ EOF
 cat<<EOF >"/tmp/container-config.json"
 {
   "metadata": {
-    "name": "${NAME}g",
+    "name": "${NAME}",
     "attempt": 2
   },
   "image":{
