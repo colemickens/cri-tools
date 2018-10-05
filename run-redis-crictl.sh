@@ -47,11 +47,11 @@ EOF
 
 sudo crictl pull "${image}"
 
-podid="$(crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
+podid="$(sudo crictl --debug runp --runtime="${RUNTIME}" "/tmp/pod-config.json")"
 
 # TODO: why is pod-config repeated, and passed by id???
 # TODO: is it just PUT semantics?
-containerid="$(crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
+containerid="$(sudo crictl --debug create ${podid} /tmp/container-config.json /tmp/pod-config.json)"
 
 # option 1 - run ash inside the container rootfs
 # todo
